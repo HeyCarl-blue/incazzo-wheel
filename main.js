@@ -215,13 +215,15 @@ function getActiveEntries() {
 // WHEEL
 function renderWheel() {
     if (!canvas || !context) return;
-    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.clearRect(0, 0, window.innerWidth, window.innerHeight);
 
     const active = getActiveEntries();
     if (active.length === 0) return;
 
-    const center = { x: canvas.width / 2, y: canvas.height / 2 };
-    const radius = Math.min(canvas.width, canvas.height) / 3.5;
+    const w = window.innerWidth, h = window.innerHeight;
+    const center = { x: w / 2, y: h / 2 };
+    const divisor = w < 600 ? 2.6 : 3.5;
+    const radius = Math.min(w, h) / divisor;
     const totalSlices = active.reduce((s, e) => s + (e.slices ?? 1), 0);
 
     let a = rotationOffset;
