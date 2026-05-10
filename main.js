@@ -4,12 +4,11 @@ function loadEntries() {
     try {
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) return JSON.parse(saved);
-    } catch {
-        return [
-            { name: 'Francesca', color: getRandomColor(), ignored: false, slices: 5 },
-            { name: 'Brave',     color: getRandomColor(), ignored: false, slices: 1 },
-        ];
-    }
+    } catch {}
+    return [
+        { name: 'Francesca', color: getRandomColor(), ignored: false, slices: 5 },
+        { name: 'Brave',     color: getRandomColor(), ignored: false, slices: 1 },
+    ];
 }
 
 function saveEntries() {
