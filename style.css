@@ -24,7 +24,7 @@ body {
 #winner-label {
     position: fixed;
     /* top: calc(50% + min(100vw, 100vh) / 3); */
-    bottom: 10%;
+    bottom: 11%;
     left: 50%;
     transform: translateX(-50%);
     color: #ecf0f1;

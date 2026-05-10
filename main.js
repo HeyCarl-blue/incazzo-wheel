@@ -404,7 +404,7 @@ window.addEventListener('load', (e) => {
         spinBtn.disabled = true;
         winnerLabel.classList.remove('visible');
         const winner = await spin();
-        winnerLabel.innerHTML = `😡 oggi mi incazzo con <span style="color: ${winner.color}">${winner.name}</span> 😡`;
+        winnerLabel.innerHTML = `😡 Oggi mi incazzo con <span style="color: ${winner.color}">${winner.name}</span> 😡`;
         winnerLabel.classList.add('visible');
         playWinner();
         spinBtn.disabled = false;
