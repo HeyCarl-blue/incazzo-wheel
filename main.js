@@ -198,10 +198,14 @@ function commitEdit(i, value) {
 }
 
 // CANVAS
-function resizeCanvas () {
+function resizeCanvas() {
     if (!canvas) canvas = document.getElementById('canvas');
-    canvas.width = window.innerWidth
-    canvas.height = window.innerHeight
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width  = window.innerWidth  * dpr;
+    canvas.height = window.innerHeight * dpr;
+    canvas.style.width  = window.innerWidth  + 'px';
+    canvas.style.height = window.innerHeight + 'px';
+    if (context) context.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
 
 function getActiveEntries() {
