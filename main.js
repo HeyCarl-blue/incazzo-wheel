@@ -1,7 +1,21 @@
-let entries = [
-    { name: 'Francesca', color: getRandomColor(), ignored: false, slices: 5 },
-    { name: 'Brave',     color: getRandomColor(), ignored: false, slices: 1 },
-];
+const STORAGE_KEY = 'incazzo-wheel-entries';
+
+function loadEntries() {
+    try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) return JSON.parse(saved);
+    } catch {}
+    return [
+        { name: 'Francesca', color: getRandomColor(), ignored: false, slices: 5 },
+        { name: 'Brave',     color: getRandomColor(), ignored: false, slices: 1 },
+    ];
+}
+
+function saveEntries() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+}
+
+let entries = loadEntries();
 
 let editingIndex = null;
 let canvas = null;
@@ -89,6 +103,7 @@ function renderMenu() {
         colorInput.addEventListener('input', e => {
             entries[i].color = e.target.value;
             swatch.style.background = entry.ignored ? '#444' : e.target.value;
+            saveEntries();
             renderWheel();
         });
 
@@ -137,6 +152,7 @@ function renderMenu() {
         checkbox.addEventListener('change', () => {
             entries[i].ignored = !checkbox.checked;
             if (editingIndex === i) editingIndex = null;
+            saveEntries();
             renderMenu();
             renderWheel();
         });
@@ -149,6 +165,7 @@ function renderMenu() {
             entries.splice(i, 1);
             if (editingIndex === i) editingIndex = null;
             else if (editingIndex !== null && editingIndex > i) editingIndex--;
+            saveEntries();
             renderMenu();
             renderWheel();
         });
@@ -175,6 +192,7 @@ function renderMenu() {
             entries[i].slices = Math.max(1, val);
             slicesInput.value = entries[i].slices;
             slicesDec.disabled = entries[i].slices <= 1;
+            saveEntries();
             renderWheel();
         };
 
@@ -193,6 +211,7 @@ function commitEdit(i, value) {
     const trimmed = value.trim();
     if (trimmed) entries[i].name = trimmed;
     editingIndex = null;
+    saveEntries();
     renderMenu();
     renderWheel();
 }
@@ -389,6 +408,7 @@ window.addEventListener('load', (e) => {
         const color = getRandomColor();
         entries.push({ name, color, ignored: false, slices: 1 });
         input.value = '';
+        saveEntries();
         renderMenu();
         renderWheel();
     });
