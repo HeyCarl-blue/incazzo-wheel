@@ -35,9 +35,7 @@ body {
     pointer-events: none;
     opacity: 0;
     transition: opacity 0.4s ease;
-    width: max-content;
-    max-width: 90vw;
-    word-break: break-word;
+    white-space: nowrap;
 }
 
 #winner-label.visible {
@@ -412,5 +410,11 @@ body {
     #add-btn {
         padding: 10px 16px;
         font-size: 1em;
+    }
+
+    #winner-label {
+        white-space: normal;
+        max-width: 90vw;
+        word-break: break-word;
     }
 }
