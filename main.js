@@ -1,10 +1,6 @@
 let entries = [
-    { name: 'Francesca', color: '#FF6B6B', ignored: false },
-    { name: 'Francesca', color: '#4ECDC4', ignored: false },
-    { name: 'Francesca', color: '#45B7D1', ignored: false },
-    { name: 'Francesca', color: '#96CEB4', ignored: false },
-    { name: 'Francesca', color: '#FFEAA7', ignored: false },
-    { name: 'Brave',     color: '#DDA0DD', ignored: false },
+    { name: 'Francesca', color: getRandomColor(), ignored: false, slices: 5 },
+    { name: 'Brave',     color: getRandomColor(), ignored: false, slices: 1 },
 ];
 
 let editingIndex = null;
@@ -93,6 +89,7 @@ function renderMenu() {
         colorInput.addEventListener('input', e => {
             entries[i].color = e.target.value;
             swatch.style.background = entry.ignored ? '#444' : e.target.value;
+            renderWheel();
         });
 
         swatch.appendChild(colorInput);
@@ -156,7 +153,38 @@ function renderMenu() {
             renderWheel();
         });
 
-        li.append(checkbox, swatch, nameEl, editBtn, removeBtn);
+        const slicesWrap = document.createElement('div');
+        slicesWrap.className = 'slices-wrap';
+
+        const slicesDec = document.createElement('button');
+        slicesDec.className = 'btn-slices';
+        slicesDec.textContent = '−';
+
+        const slicesInput = document.createElement('input');
+        slicesInput.type = 'number';
+        slicesInput.className = 'slices-input';
+        slicesInput.min = 1;
+        slicesInput.value = entry.slices ?? 1;
+        slicesInput.title = 'Slices';
+
+        const slicesInc = document.createElement('button');
+        slicesInc.className = 'btn-slices';
+        slicesInc.textContent = '+';
+
+        const setSlices = (val) => {
+            entries[i].slices = Math.max(1, val);
+            slicesInput.value = entries[i].slices;
+            slicesDec.disabled = entries[i].slices <= 1;
+            renderWheel();
+        };
+
+        slicesInput.addEventListener('change', () => setSlices(parseInt(slicesInput.value) || 1));
+        slicesDec.addEventListener('click', () => setSlices(entries[i].slices - 1));
+        slicesInc.addEventListener('click', () => setSlices(entries[i].slices + 1));
+        slicesDec.disabled = (entry.slices ?? 1) <= 1;
+
+        slicesWrap.append(slicesDec, slicesInput, slicesInc);
+        li.append(checkbox, swatch, nameEl, editBtn, slicesWrap, removeBtn);
         list.appendChild(li);
     });
 }
@@ -190,11 +218,11 @@ function renderWheel() {
 
     const center = { x: canvas.width / 2, y: canvas.height / 2 };
     const radius = Math.min(canvas.width, canvas.height) / 3.5;
-    const angleInc = (2 * Math.PI) / active.length;
+    const totalSlices = active.reduce((s, e) => s + (e.slices ?? 1), 0);
 
-    for (let i = 0; i < active.length; i++) {
-        const a = rotationOffset + i * angleInc;
-        const entry = active[i];
+    let a = rotationOffset;
+    for (const entry of active) {
+        const angleInc = (entry.slices ?? 1) / totalSlices * 2 * Math.PI;
 
         context.beginPath();
         context.moveTo(center.x, center.y);
@@ -207,7 +235,8 @@ function renderWheel() {
         context.stroke();
 
         // Label
-        const fontSize = Math.max(11, Math.min(18, Math.floor(220 / active.length)));
+        const totalWeight = active.reduce((s, e) => s + (e.slices ?? 1), 0);
+        const fontSize = Math.max(11, Math.min(18, Math.floor(220 / totalWeight)));
         context.save();
         context.translate(center.x, center.y);
         context.rotate(a + angleInc / 2);
@@ -216,14 +245,17 @@ function renderWheel() {
         context.font = `bold ${fontSize}px Arial`;
         context.fillText(entry.name, radius * 0.65, fontSize * 0.35, radius * 0.55);
         context.restore();
+
+        a += angleInc;
     }
 
     // Separator circles
     const sepRadius = radius / 50;
-    for (let i = 0; i < active.length; i++) {
-        const a = rotationOffset + i * angleInc;
+    a = rotationOffset;
+    for (const entry of active) {
         const sepX = center.x + radius * Math.cos(a);
         const sepY = center.y + radius * Math.sin(a);
+        a += (entry.slices ?? 1) / totalSlices * 2 * Math.PI;
         context.beginPath();
         context.arc(sepX, sepY, sepRadius, 0, 2 * Math.PI);
         context.closePath();
@@ -275,14 +307,17 @@ function updatePointer() {
     const active = getActiveEntries();
     if (active.length === 0) return;
 
-    const angleInc = (2 * Math.PI) / active.length;
-    const phase     = ((rotationOffset % angleInc) + angleInc) % angleInc;
-    const prevPhase = ((prevRotOffset  % angleInc) + angleInc) % angleInc;
-
-    // A spoke just crossed the top — deflect the pointer in the spin direction
-    if (phase < prevPhase) {
-        pointerAngleVel -= Math.min(angularVelocity * 1.2, 0.25);
-        playTick(angularVelocity);
+    const total = active.reduce((s, e) => s + (e.slices ?? 1), 0);
+    let cumAngle = 0;
+    for (const entry of active) {
+        // Boundary is at the pointer (-π/2) when rotationOffset = -π/2 - cumAngle + k*2π
+        const target = -Math.PI / 2 - cumAngle;
+        if (Math.floor((rotationOffset - target) / (2 * Math.PI)) >
+            Math.floor((prevRotOffset  - target) / (2 * Math.PI))) {
+            pointerAngleVel -= Math.min(angularVelocity * 1.2, 0.25);
+            playTick(angularVelocity);
+        }
+        cumAngle += (entry.slices ?? 1) / total * 2 * Math.PI;
     }
     prevRotOffset = rotationOffset;
 
@@ -315,13 +350,17 @@ function animate(resolve) {
     }
 }
 
-function getWinner () {
+function getWinner() {
     const active = getActiveEntries();
-    const angleInc = (2 * Math.PI) / active.length;
-
+    if (active.length === 0) return null;
+    const total = active.reduce((s, e) => s + (e.slices ?? 1), 0);
     const rel = ((-Math.PI / 2 - rotationOffset) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
-
-    return active[Math.floor(rel / angleInc) % active.length];
+    let cumAngle = 0;
+    for (const entry of active) {
+        cumAngle += (entry.slices ?? 1) / total * 2 * Math.PI;
+        if (rel < cumAngle) return entry;
+    }
+    return active[active.length - 1];
 }
 
 window.addEventListener('resize', () => { resizeCanvas(); renderWheel(); });
@@ -341,7 +380,7 @@ window.addEventListener('load', (e) => {
         const name = input.value.trim();
         if (!name) return;
         const color = getRandomColor();
-        entries.push({ name, color, ignored: false });
+        entries.push({ name, color, ignored: false, slices: 1 });
         input.value = '';
         renderMenu();
         renderWheel();

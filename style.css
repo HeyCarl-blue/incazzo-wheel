@@ -15,7 +15,8 @@ body {
 
 #winner-label {
     position: fixed;
-    top: calc(50% + min(100vw, 100vh) / 3);
+    /* top: calc(50% + min(100vw, 100vh) / 3); */
+    bottom: 10%;
     left: 50%;
     transform: translateX(-50%);
     color: #ecf0f1;
@@ -180,6 +181,65 @@ body {
 .entry-item.ignored .entry-name {
     opacity: 0.35;
     text-decoration: line-through;
+}
+
+/* Slices stepper */
+.slices-wrap {
+    display: flex;
+    align-items: stretch;
+    flex-shrink: 0;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.slices-input {
+    width: 30px;
+    background: rgba(255,255,255,0.08);
+    border: none;
+    border-left: 1px solid rgba(255,255,255,0.15);
+    border-right: 1px solid rgba(255,255,255,0.15);
+    color: #ecf0f1;
+    font-size: 0.82em;
+    text-align: center;
+    padding: 3px 2px;
+}
+
+.slices-input:focus {
+    outline: none;
+    background: rgba(255,255,255,0.13);
+}
+
+.slices-input::-webkit-inner-spin-button,
+.slices-input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.slices-input {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+.btn-slices {
+    border: none;
+    background: rgba(255,255,255,0.08);
+    color: #ecf0f1;
+    font-size: 14px;
+    width: 22px;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    transition: background 0.12s;
+}
+
+.btn-slices:hover:not(:disabled) {
+    background: rgba(255,255,255,0.18);
+}
+
+.btn-slices:disabled {
+    opacity: 0.3;
+    cursor: default;
 }
 
 /* Inline edit input */
