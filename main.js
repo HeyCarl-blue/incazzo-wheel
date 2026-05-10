@@ -372,8 +372,9 @@ function getWinner() {
 window.addEventListener('resize', () => { resizeCanvas(); renderWheel(); });
 
 window.addEventListener('load', (e) => {
-    resizeCanvas();
+    canvas = document.getElementById('canvas');
     context = canvas.getContext('2d');
+    resizeCanvas();
 
     // Toggle collapse
     document.getElementById('menu-toggle').addEventListener('click', () => {
